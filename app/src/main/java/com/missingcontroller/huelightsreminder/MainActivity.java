@@ -1,56 +1,81 @@
 package com.missingcontroller.huelightsreminder;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLConnection;
 
 public class MainActivity extends AppCompatActivity {
+
+    private static String TAG = "TEST";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        BufferedReader reader = null;
+        new CheckLights().execute();
+    }
 
-        try {
+    class CheckLights extends AsyncTask<String, Void, Void> {
 
-            // Defined URL  where to send data
-            URL url = new URL("/media/webservice/httppost.php");
+        protected Void doInBackground(String... urls) {
 
-            // Send POST data request
+            try {
+                // Defined URL  where to send data
+                URL url = null;
+                try {
+                    url = new URL("http://192.168.1.154/api/ThbE9KYmC8DxS9C1AhdTiL6Fk3WSpTwODd0ATzOf");
+                } catch (MalformedURLException e) {
+                    e.printStackTrace();
+                }
 
-            URLConnection conn = url.openConnection();
-            conn.setDoOutput(true);
-            OutputStreamWriter wr = new OutputStreamWriter(conn.getOutputStream());
-            //wr.write( data );
-            wr.flush();
+                Log.wtf(TAG, "URL = " + url.toString());
 
-            // Get the server response
+                URLConnection kb = null;
+                kb = url.openConnection();
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        kb.getInputStream(), "UTF-8"));
 
-            reader = new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            StringBuilder sb = new StringBuilder();
-            String line = null;
+                String inputLine;
+                StringBuilder a = new StringBuilder();
+                while ((inputLine = in.readLine()) != null) {
+                    a.append(inputLine);
+                }
+                in.close();
 
-            // Read Server Response
-            while ((line = reader.readLine()) != null) {
-                // Append server response in string
-                sb.append(line + "\n");
+                Log.wtf(TAG, a.toString());
+
+                JSONObject jsonObject = new JSONObject(a.toString());
+                JSONArray jsonArray = jsonObject.getJSONArray("lights");
+
+                Gson gson = new GsonBuilder().setPrettyPrinting().create();
+                String json = gson.toJson(jsonArray.getJSONObject(0));
+
+                Log.wtf(TAG, "First Object: " + json);
+
+            } catch (Exception e) {
+                Log.wtf(TAG, e.toString());
             }
 
-
-            Log.d("TEST", sb.toString());
-        } catch (IOException e) {
-            e.printStackTrace();
+            return null;
         }
 
-
+        protected void onPostExecute(String feed) {
+            // TODO: check this.exception
+            // TODO: do something with the feed
+        }
     }
 }
