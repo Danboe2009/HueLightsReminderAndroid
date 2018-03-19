@@ -5,10 +5,6 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
@@ -56,16 +52,28 @@ public class MainActivity extends AppCompatActivity {
                 }
                 in.close();
 
-                Log.wtf(TAG, a.toString());
+                //Log.wtf(TAG, a.toString());
 
                 JSONObject jsonObject = new JSONObject(a.toString());
-                JSONArray jsonArray = jsonObject.getJSONArray("lights");
+                JSONObject lights = jsonObject.getJSONObject("lights");
 
-                Gson gson = new GsonBuilder().setPrettyPrinting().create();
-                String json = gson.toJson(jsonArray.getJSONObject(0));
-
-                Log.wtf(TAG, "First Object: " + json);
-
+                for (int i = 0; i < lights.length(); i++) {
+                    JSONObject light = lights.getJSONObject(String.valueOf(i + 1));
+                    JSONObject state = light.getJSONObject("state");
+                    Log.wtf(TAG, "Lights: (" + (i + 1) + ") " + state.get("on"));
+                    if (!state.getBoolean("on")) {
+                        switch (i + 1) {
+                            case 1:
+                            case 5:
+                            case 2:
+                                Log.wtf(TAG, "Bedroom Light " + (1 + i) + " is off");
+                            case 3:
+                                Log.wtf(TAG, "Kitchen Light is off");
+                            case 4:
+                                Log.wtf(TAG, "Living Room Light is off");
+                        }
+                    }
+                }
             } catch (Exception e) {
                 Log.wtf(TAG, e.toString());
             }
