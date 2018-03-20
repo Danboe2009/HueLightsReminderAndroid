@@ -1,7 +1,12 @@
 package com.missingcontroller.huelightsreminder;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.content.res.Resources;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.CountDownTimer;
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
@@ -23,6 +28,35 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         new CheckLights().execute();
+
+        SendNotification("Kitchen");
+
+
+    }
+
+    private void SendNotification(String loc) {
+        Resources r = getResources();
+        Notification notification = new NotificationCompat.Builder(this)
+                .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                .setContentTitle("You left a light on.")
+                .setContentText("You left the " + loc + " light on.")
+                .setAutoCancel(true)
+                .build();
+
+        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
+    }
+
+    private void Timer(final String loc) {
+        new CountDownTimer(300000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+            }
+
+            public void onFinish() {
+                SendNotification(loc);
+            }
+        }.start();
     }
 
     class CheckLights extends AsyncTask<String, Void, Void> {
@@ -67,10 +101,27 @@ public class MainActivity extends AppCompatActivity {
                             case 5:
                             case 2:
                                 Log.wtf(TAG, "Bedroom Light " + (1 + i) + " is off");
+                                break;
                             case 3:
                                 Log.wtf(TAG, "Kitchen Light is off");
+                                break;
                             case 4:
                                 Log.wtf(TAG, "Living Room Light is off");
+                                break;
+                        }
+                    } else {
+                        switch (i + 1) {
+                            case 1:
+                            case 5:
+                            case 2:
+                                Timer("Bedroom");
+                                break;
+                            case 3:
+                                Timer("Kitchen");
+                                break;
+                            case 4:
+                                Timer("Living Room");
+                                break;
                         }
                     }
                 }
