@@ -21,6 +21,7 @@ import java.net.URLConnection;
 public class MainActivity extends AppCompatActivity {
 
     private static String TAG = "TEST";
+    public String loc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,7 +30,7 @@ public class MainActivity extends AppCompatActivity {
 
         new CheckLights().execute();
 
-        SendNotification("Kitchen");
+        //SendNotification("Kitchen");
 
 
     }
@@ -45,12 +46,15 @@ public class MainActivity extends AppCompatActivity {
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
         notificationManager.notify(0, notification);
+
+        new CheckLights().execute();
     }
 
     private void Timer(final String loc) {
         new CountDownTimer(300000, 1000) {
 
             public void onTick(long millisUntilFinished) {
+                Log.wtf(TAG, "Time is " + millisUntilFinished);
             }
 
             public void onFinish() {
@@ -60,6 +64,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class CheckLights extends AsyncTask<String, Void, Void> {
+
+        private Runnable RunTimer = new Runnable() {
+            @Override
+            public void run() {
+
+                Timer(loc);
+            }
+        };
 
         protected Void doInBackground(String... urls) {
 
@@ -114,13 +126,16 @@ public class MainActivity extends AppCompatActivity {
                             case 1:
                             case 5:
                             case 2:
-                                Timer("Bedroom");
+                                loc = "Bedroom";
+                                runOnUiThread(RunTimer);
                                 break;
                             case 3:
-                                Timer("Kitchen");
+                                loc = "Kitchen";
+                                runOnUiThread(RunTimer);
                                 break;
                             case 4:
-                                Timer("Living Room");
+                                loc = "Living Room";
+                                runOnUiThread(RunTimer);
                                 break;
                         }
                     }
