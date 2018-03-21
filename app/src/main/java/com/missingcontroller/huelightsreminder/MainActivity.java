@@ -60,6 +60,9 @@ public class MainActivity extends AppCompatActivity {
         }
 
         new CheckLights().execute();
+
+        Intent i = new Intent(this, ServiceClass.class);
+        startService(i);
     }
 
     private void SendNotification(String loc) {
