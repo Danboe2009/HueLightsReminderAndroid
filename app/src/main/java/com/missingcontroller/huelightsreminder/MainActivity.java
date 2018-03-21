@@ -37,7 +37,7 @@ public class MainActivity extends AppCompatActivity {
         countDownTimer = new CountDownTimer(300000, 1000) {
             @Override
             public void onTick(long millisUntilFinished) {
-                Log.wtf(TAG, "Time is " + millisUntilFinished);
+                //Log.wtf(TAG, "Time is " + millisUntilFinished);
             }
 
             @Override
@@ -50,7 +50,9 @@ public class MainActivity extends AppCompatActivity {
         if (extras == null) {
             //Cry about not being clicked on
         } else if (extras.getBoolean("NotiClick")) {
+            num = extras.getInt("Number", -1);
             Log.wtf(TAG, "Tagged");
+            Log.wtf(TAG, "Number at start: " + num);
             new TurnOffLight().execute();
         }
 
@@ -61,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
 
         Intent intent = new Intent(this, MainActivity.class);
         intent.putExtra("NotiClick", true);
+        intent.putExtra("Number", num);
         PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         Resources r = getResources();
@@ -73,7 +76,9 @@ public class MainActivity extends AppCompatActivity {
                 .build();
 
         NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(0, notification);
+        notificationManager.notify(num, notification);
+
+        Log.wtf(TAG, "Notification Sent: " + num + " " + loc);
     }
 
     private void Timer() {
@@ -86,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
         private Runnable RunNoti = new Runnable() {
             @Override
             public void run() {
-
                 SendNotification(loc);
                 Timer();
             }
@@ -95,8 +99,6 @@ public class MainActivity extends AppCompatActivity {
         private Runnable RunTimer = new Runnable() {
             @Override
             public void run() {
-
-                SendNotification(loc);
                 Timer();
             }
         };
@@ -150,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                                 break;
                         }
                         runOnUiThread(RunTimer);
-                    } else {
+                    } else if (state.getBoolean("on")) {
                         switch (i + 1) {
                             case 1:
                             case 5:
@@ -195,6 +197,7 @@ public class MainActivity extends AppCompatActivity {
                 // Defined URL  where to send data
                 URL url = null;
                 try {
+                    Log.wtf(TAG, "The number is " + num);
                     url = new URL("http://192.168.1.154/api/ThbE9KYmC8DxS9C1AhdTiL6Fk3WSpTwODd0ATzOf/groups/" + num + "/action");
                 } catch (MalformedURLException e) {
                     e.printStackTrace();
