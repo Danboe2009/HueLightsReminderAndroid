@@ -1,11 +1,14 @@
 package com.missingcontroller.huelightsreminder;
 
 import android.app.Notification;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.support.v4.app.NotificationCompat;
@@ -61,22 +64,54 @@ public class MainActivity extends AppCompatActivity {
 
     private void SendNotification(String loc) {
 
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.putExtra("NotiClick", true);
-        intent.putExtra("Number", num);
-        PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("NotiClick", true);
+            intent.putExtra("Number", num);
+            PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        Resources r = getResources();
-        Notification notification = new NotificationCompat.Builder(this)
-                .setSmallIcon(android.R.drawable.ic_menu_report_image)
-                .setContentTitle("You left a light on.")
-                .setContentText("You left the " + loc + " light on.")
-                .setContentIntent(pIntent)
-                .setAutoCancel(true)
-                .build();
+            Resources r = getResources();
+            Notification notification = new NotificationCompat.Builder(this)
+                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                    .setContentTitle("You left a light on.")
+                    .setContentText("You left the " + loc + " light on.")
+                    .setContentIntent(pIntent)
+                    .setAutoCancel(true)
+                    .build();
 
-        NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
-        notificationManager.notify(num, notification);
+
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(num, notification);
+        }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            Intent intent = new Intent(this, MainActivity.class);
+            intent.putExtra("NotiClick", true);
+            intent.putExtra("Number", num);
+            PendingIntent pIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+            // Sets an ID for the notification, so it can be updated.
+            int notifyID = 1;
+            String CHANNEL_ID = "my_channel_01";// The id of the channel.
+            CharSequence name = getString(R.string.app_name);// The user-visible name of the channel.
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel mChannel = new NotificationChannel(CHANNEL_ID, name, importance);
+// Create a notification and set the notification channel.
+            Notification notification = new Notification.Builder(MainActivity.this)
+                    .setSmallIcon(android.R.drawable.ic_menu_report_image)
+                    .setContentTitle("You left a light on.")
+                    .setContentText("You left the " + loc + " light on.")
+                    .setContentIntent(pIntent)
+                    .setAutoCancel(true)
+                    .setChannelId(CHANNEL_ID)
+                    .build();
+            NotificationManager notificationManager = (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+            NotificationManager mNotificationManager =
+                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+            notificationManager.notify(num, notification);
+        }
+
 
         Log.wtf(TAG, "Notification Sent: " + num + " " + loc);
     }
